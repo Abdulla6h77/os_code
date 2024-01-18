@@ -1,51 +1,50 @@
-def bubblesort(arrival_time, burst_time, n):
-    for i in range(n):
-        for j in range(0, n - i - 1):
-            # Compare based on arrival time first
-            if arrival_time[j] > arrival_time[j + 1]:
-                arrival_time[j], arrival_time[j + 1] = arrival_time[j + 1], arrival_time[j]
-                burst_time[j], burst_time[j + 1] = burst_time[j + 1], burst_time[j]
-            # If arrival times are equal, compare based on burst time
-            elif arrival_time[j] == arrival_time[j + 1] and burst_time[j] > burst_time[j + 1]:
-                arrival_time[j], arrival_time[j + 1] = arrival_time[j + 1], arrival_time[j]
-                burst_time[j], burst_time[j + 1] = burst_time[j + 1], burst_time[j]
+def sjf(processes, n):
+    # Sort the processes based on arrival time and burst time
+    processes.sort(key=lambda x: (x[0], x[1]))
 
-def sjf(arrival_time, burst_time, n):
-    completion_time = [0] * n
-    turnaround_time = [0] * n
+    # variables to store waiting time, turnaround time, completion time, and sums for average calculation
     waiting_time = [0] * n
-    total_wait = 0
-    total_turn = 0
+    turnaround_time = [0] * n
+    completion_time = [0] * n
+    total_waiting_time = 0
+    total_turnaround_time = 0
 
+    # calculate completion time, waiting time, and turnaround time for each process
     for i in range(n):
         if i == 0:
-            completion_time[i] = arrival_time[i] + burst_time[i]
+            completion_time[i] = processes[i][0] + processes[i][1]
         else:
-            completion_time[i] = completion_time[i - 1] + burst_time[i]
-        
-        turnaround_time[i] = completion_time[i] - arrival_time[i]
-        waiting_time[i] = turnaround_time[i] - burst_time[i]
-        total_wait += waiting_time[i]
-        total_turn += turnaround_time[i]
+            completion_time[i] = completion_time[i - 1] + processes[i][1]
 
-    print("PROCESS\t ARRIVAL TIME \t BURST TIME \t TURNAROUND TIME \t WAITING TIME\t")
+        waiting_time[i] = max(0, completion_time[i] - processes[i][1] - processes[i][0])
+        turnaround_time[i] = waiting_time[i] + processes[i][1]
+
+    # calculate total waiting time and total turnaround time for average calculation
+    total_waiting_time = sum(waiting_time)
+    total_turnaround_time = sum(turnaround_time)
+
+    # calculate average waiting time and average turnaround time
+    average_waiting_time = total_waiting_time / n
+    average_turnaround_time = total_turnaround_time / n
+
+    # print the result in the form of a table
+    print("Process\tAT\tBT\tWT\tTAT\tCT")
     for i in range(n):
-        print("P[{}]\t\t{}\t\t{}\t\t{}\t\t{}".format(i + 1, arrival_time[i], burst_time[i], turnaround_time[i],
-                                                       waiting_time[i]))
+        print(f"{processes[i][2]}\t\t{processes[i][0]}\t\t{processes[i][1]}\t\t{waiting_time[i]}\t\t{turnaround_time[i]}\t\t{completion_time[i]}")
 
-    avgw = total_wait / n
-    avgt = total_turn / n
-    print("average waiting time=", avgw)
-    print("average TAT time=", avgt)
+    # print average waiting time and average turnaround time
+    print(f"\nAverage Waiting Time (AWT): {average_waiting_time:.2f}")
+    print(f"Average Turnaround Time (ATAT): {average_turnaround_time:.2f}")
 
-n = int(input("Enter process number: "))
-arrival_time = [0] * n
-burst_time = [0] * n
+# Example usage with user input
+if __name__ == "__main__":
+    n = int(input("Enter the number of processes: "))
 
-for i in range(n):
-    arrival_time[i] = int(input(f"Enter process P[{i + 1}] arrival time: "))
-    burst_time[i] = int(input(f"Enter process P[{i + 1}] burst time: "))
+    processes = []
+    print("\nEnter arrival time and burst time for each process:")
+    for i in range(n):
+        arrival = int(input(f"Enter arrival time for process {i + 1}: "))
+        burst = int(input(f"Enter burst time for process {i + 1}: "))
+        processes.append((arrival, burst, i + 1))
 
-
-bubblesort(arrival_time, burst_time, n)
-sjf(arrival_time, burst_time, n)
+    sjf(processes, n)

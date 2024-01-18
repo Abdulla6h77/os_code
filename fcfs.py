@@ -1,42 +1,49 @@
-def fcfs_scheduling():
-    # Step 2: Input the number of processes, arrival time, and burst time
-    n = int(input("Enter the number of processes: "))
-    arrival_time = []
-    burst_time = []
-
-    for i in range(n):
-        arrival_time.append(int(input(f"Enter arrival time for process {i + 1}: ")))
-        burst_time.append(int(input(f"Enter burst time for process {i + 1}: ")))
-
-    # Step 5: Sort processes based on arrival time
-    processes = sorted(range(n), key=lambda k: arrival_time[k])
-
-    # Step 6: Initialize variables
-    completion_time = [0] * n
-    turnaround_time = [0] * n
+def fcfs(processes, n):
+    # variables to store waiting time, turnaround time, completion time, and sums for average calculation
     waiting_time = [0] * n
-    current_time = 0
+    turnaround_time = [0] * n
+    completion_time = [0] * n
+    total_waiting_time = 0
+    total_turnaround_time = 0
 
-    # Step 7: Calculate completion time, turnaround time, and waiting time
-    for i in processes:
-        completion_time[i] = max(current_time, arrival_time[i]) + burst_time[i]
-        turnaround_time[i] = completion_time[i] - arrival_time[i]
-        waiting_time[i] = turnaround_time[i] - burst_time[i]
-        current_time = completion_time[i]
+    # waiting time for the first process is 0
+    waiting_time[0] = 0
 
-    # Step 8: Calculate and display Average Waiting Time (AWT) and Average Turnaround Time (ATAT)
+    # calculate completion time, waiting time, and turnaround time for each process
+    completion_time[0] = processes[0][1]
+    for i in range(1, n):
+        waiting_time[i] = max(0, completion_time[i - 1] - processes[i][0])
+        completion_time[i] = completion_time[i - 1] + processes[i][1]
+        turnaround_time[i] = waiting_time[i] + processes[i][1]
+
+    # calculate total waiting time and total turnaround time for average calculation
     total_waiting_time = sum(waiting_time)
     total_turnaround_time = sum(turnaround_time)
-    awt = total_waiting_time / n
-    atat = total_turnaround_time / n
 
-    print("\nProcess\t Arrival Time\t Burst Time\t Completion Time\t Turnaround Time\t Waiting Time")
+    # calculate average waiting time and average turnaround time
+    average_waiting_time = total_waiting_time / n
+    average_turnaround_time = total_turnaround_time / n
+
+    # print the result in the form of a table
+    print("Process\tAT\tBT\tWT\tTAT\tCT")
     for i in range(n):
-        print(f"{i + 1}\t {arrival_time[i]}\t\t {burst_time[i]}\t\t {completion_time[i]}\t\t {turnaround_time[i]}\t\t {waiting_time[i]}")
+        print(f"{processes[i][2]}\t\t{processes[i][0]}\t\t{processes[i][1]}\t\t{waiting_time[i]}\t\t{turnaround_time[i]}\t\t{completion_time[i]}")
 
-    print(f"\nAverage Waiting Time: {awt:.2f}")
-    print(f"Average Turnaround Time: {atat:.2f}")
+    # print average waiting time and average turnaround time
+    print(f"\nAverage Waiting Time (AWT): {average_waiting_time:.2f}")
+    print(f"Average Turnaround Time (ATAT): {average_turnaround_time:.2f}")
 
-# Step 1: Start
-fcfs_scheduling()
-# Step 9: Stop
+# Example usage with user input
+if __name__ == "__main__":
+    n = int(input("Enter the number of processes: "))
+
+    processes = []
+    print("\nEnter arrival time and burst time for each process:")
+    for i in range(n):
+        arrival = int(input(f"Enter arrival time for process {i + 1}: "))
+        burst = int(input(f"Enter burst time for process {i + 1}: "))
+        processes.append((arrival, burst, i + 1))
+
+    fcfs(processes, n)
+
+    
